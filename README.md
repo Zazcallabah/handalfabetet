@@ -1,1 +1,3 @@
 # handalfabetet
+
+Träna läsa handalfabetet.

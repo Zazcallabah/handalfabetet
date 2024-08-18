@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="utf-8"/>
+<style>
+body {
+text-align: center;
+}
+img {
+  position:absolute;
+  opacity: 0;
+  left:0;
+  top: 100px;
+  transition: opacity 0.3s ease-in-out;
+  width: 80%;
+}
+#result { font-size: 3rem; margin-top:20%; }
+#ok { display: none }
+button { font-size: 24pt; padding: 20px; margin: 0 auto; width:200px; }
+</style>
+<script>
+var wordlist = ["adress","advokat","afton","apelsin","apparat","arbetsplats","askkopp","avdelning","bagare","bakelse","balkong","banan","bandspelare","biljett","blomma","brandman","bulle","butik","check","citron","cykel","dator","deltagare","diskmaskin","dotter","dusch","elefant","expedit","fabrik","familj","farbror","flaska","flicka","fluga","flygplats","fotboll","fotbollspelare","frukost","frukt","fysiker","gaffel","gardin","glass","gurka","handduk","handske","hustru","hylla","jacka","jordgubbe","journalist","jumper","kalender","kamera","kamrat","karta","kassa","kasse","kille","kiosk","klocka","kokbok","kompis","kostym","krona","kropp","kudde","kusin","kvinna","lampa","lucka","lunch","madrass","mamma","mangel","maskin","matta","medicin","mekaniker","mening","minut","moder","mamma","morbror","morgon","morot","moster","musiker","nagel","nyckel","ordningsman","pappa","paprika","penna","person","personuppgift","pojke","polis","radio","restaurang","servitris","signal","skillnad","skola","skomakare","soffa","sommar","soppa","sotare","spegel","station","stereo","strand","strumpa","syster","tabell","tandborste","tanke","tavla","teater","tekniker","telefon","telefonsvarare","tidning","timme","toalett","toalettstol","tomat","tomte","torktumlare","trappa","triangel","tulpan","turist","vante","vecka","verkstad","video","villa","vinter","ansikte","apotek","arbete","armband","badkar","badrum","bibliotek","block","dagis","datum","element","exempel","flerfamiljhus","hallon","halsband","maria","argareta","elisabeth","christina","birgitta","karin","ingrid","sofia","linnea","kerstin","andreas","stefan","helena","johanna","inger","cecilia","anita","louise","gunilla","linda","anders","johan","mikael","lennart","peter","gunnar","fredrik","bengt","daniel","gustav","alexander","magnus","martin","huvud","intresse","kapitel","konto","kvitto","lexikon","meddelande","nummer","paket","papper","piano","plommon","porto","problem","program","radergummi","samtal","schampo","schema","sovrum","suddgummi","syskon","system","toaletpapper","tuggummi","universitet","vardagsrum","vatten"];
+var wordqueue = [];
+var currentWord = "";
+var active = false;
+function addImage(letter)
+{
+	var img = document.createElement("img");
+	img.src = "c/"+letter+".jpg";
+	img.id = letter;
+	var src = document.getElementById("content");
+	src.appendChild(img);
+}
+
+function getDelay()
+{
+	return parseInt(document.getElementById("ms").value,10);
+}
+function ok_result()
+{
+	document.getElementById("next").style.display = "block"
+	document.getElementById("ok").style.display = "none"
+	document.getElementById("result").innerText = `Det var '${currentWord}'`;
+}
+function next()
+{
+	document.getElementById("next").style.display = "none"
+	document.getElementById("result").innerText = "";
+	if( active )
+		return;
+	active = true;
+	go(selectWord(),getDelay());
+}
+function fillWordQueue()
+{
+	if(wordqueue.length > 0)
+		return;
+	var ints = [];
+	for( var i = 0; i<wordlist.length; i++ )
+		ints.push(i);
+	var randoms = [];
+	while( ints.length > 0 )
+	{
+		randoms.push( ints.splice( Math.floor(Math.random()*ints.length), 1 )[0] )
+	}
+	for( var i=0; i<randoms.length; i++ )
+	{
+		wordqueue.push(wordlist[randoms[i]]);
+	}
+}
+function selectWord()
+{
+	if( wordqueue.length == 0 )
+		fillWordQueue();
+	currentWord = wordqueue.splice(0,1)[0];
+	return currentWord;
+}
+function go(word,delay)
+{
+	if( !delay )
+		delay = 800;
+
+	changeTo(word[0]);
+	if( word.length >1 )
+		setTimeout(function(){ go(word.substring(1),delay)},delay);
+	else
+	{
+		setTimeout(function(){
+			document.getElementById("ok").style.display = "block";
+			changeTo(" "); },delay*2);
+		active = false;
+	}
+}
+function delayedSetOpacity(img,value)
+{
+	img.style["z-index"] = 0;
+	setTimeout(function(){img.style.opacity = value},200);
+}
+
+function changeTo(letter)
+{
+	var imgs = document.getElementsByTagName("img");
+	for( var i = 0; i<imgs.length; i++)
+	{
+		if(imgs[i].id == letter )
+		{
+			imgs[i].style["z-index"] = 10;
+			imgs[i].style.opacity = 1
+		}
+		else if( imgs[i].style.opacity != 0 )
+		{
+			delayedSetOpacity(imgs[i],0);
+		}
+	}
+}
+function load()
+{
+	var az = "abcdefghijklmnopqrstuvwxyz";
+	for( var i= 0; i<az.length;i++)
+	{
+		addImage(az[i]);
+	}
+}
+</script>
+</head>
+<body onload="load()">
+	<button id="ok" onclick="ok_result()">Ok</button>
+	<button id="next" onclick="next()">Nästa</button>
+	<div id="result"> </div>
+
+	<div id="content"></div>
+<p style="position: absolute; bottom: 1em; z-index: 15;">Tid i ms mellan bilder: <input value="800" id="ms"/></p>
+</body>
+</html>
